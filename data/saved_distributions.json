@@ -1,0 +1,24 @@
+{
+    "distributions": [
+        {
+            "Distribution": "Lognormal",
+            "Parameters": {
+                "mu": 0.0,
+                "sigma": 0.5,
+                "size": 10000,
+                "lower": null,
+                "upper": null
+            }
+        },
+        {
+            "Distribution": "Lognormal",
+            "Parameters": {
+                "mu": 0.0,
+                "sigma": 0.5,
+                "size": 10,
+                "lower": null,
+                "upper": null
+            }
+        }
+    ]
+}
