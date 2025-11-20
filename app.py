@@ -70,24 +70,34 @@ elif page == "Upload & Fit":
     # Distribution selector
     dist_type = st.sidebar.selectbox(
         "Select a distribution",
-        ["Uniform", "Gaussian", "Lognormal", "Triangular"]
+        DIST_UI_SAMPLE.keys()
     )
 
-    if dist_type == "Uniform":
-        params = uniform_ui(sidebar=True)
-        fitted_samples = uniform_sample(params)
+    ui_func, sample_func = DIST_UI_SAMPLE[dist_type]
+    params = ui_func(sidebar=True)
+    samples = sample_func(params)
+    
+    # # Distribution selector
+    # dist_type = st.sidebar.selectbox(
+    #     "Select a distribution",
+    #     ["Uniform", "Gaussian", "Lognormal", "Triangular"]
+    # )
 
-    elif dist_type == "Gaussian":
-        params = gaussian_ui(sidebar=True)
-        fitted_samples = gaussian_sample(params)
+    # if dist_type == "Uniform":
+    #     params = uniform_ui(sidebar=True)
+    #     fitted_samples = uniform_sample(params)
 
-    elif dist_type == "Lognormal":
-        params = lognormal_ui(sidebar=True)
-        fitted_samples = lognormal_sample(params)
+    # elif dist_type == "Gaussian":
+    #     params = gaussian_ui(sidebar=True)
+    #     fitted_samples = gaussian_sample(params)
 
-    elif dist_type == "Triangular":
-        params = triangular_ui(sidebar=True)
-        fitted_samples = triangular_sample(params)
+    # elif dist_type == "Lognormal":
+    #     params = lognormal_ui(sidebar=True)
+    #     fitted_samples = lognormal_sample(params)
+
+    # elif dist_type == "Triangular":
+    #     params = triangular_ui(sidebar=True)
+    #     fitted_samples = triangular_sample(params)
 
     if uploaded_file:
         # Load data
