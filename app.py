@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 from utils.plotting import plot_histogram, plot_cdf, show_distribution
-from utils.storage import load_saved, save_distribution
+from utils.storage import load_saved, save_distribution, get_uploaded_data
 from distributions.uniform_dist import uniform_ui, uniform_sample
 from distributions.gaussian_dist import gaussian_ui, gaussian_sample
 from distributions.lognormal_dist import lognormal_ui, lognormal_sample
@@ -65,7 +65,6 @@ if page == "Generate Distribution":
 # --------------------------
 elif page == "Upload & Fit":
     st.subheader("Upload your CSV or Excel file")
-    uploaded_file = st.file_uploader("Choose CSV or Excel", type=["csv", "xlsx"])
 
     # Distribution selector
     dist_type = st.sidebar.selectbox(
@@ -76,36 +75,9 @@ elif page == "Upload & Fit":
     ui_func, sample_func = DIST_UI_SAMPLE[dist_type]
     params = ui_func(sidebar=True)
     samples = sample_func(params)
-    
-    # # Distribution selector
-    # dist_type = st.sidebar.selectbox(
-    #     "Select a distribution",
-    #     ["Uniform", "Gaussian", "Lognormal", "Triangular"]
-    # )
 
-    # if dist_type == "Uniform":
-    #     params = uniform_ui(sidebar=True)
-    #     fitted_samples = uniform_sample(params)
-
-    # elif dist_type == "Gaussian":
-    #     params = gaussian_ui(sidebar=True)
-    #     fitted_samples = gaussian_sample(params)
-
-    # elif dist_type == "Lognormal":
-    #     params = lognormal_ui(sidebar=True)
-    #     fitted_samples = lognormal_sample(params)
-
-    # elif dist_type == "Triangular":
-    #     params = triangular_ui(sidebar=True)
-    #     fitted_samples = triangular_sample(params)
-
-    if uploaded_file:
-        # Load data
-        if uploaded_file.name.endswith(".csv"):
-            df = pd.read_csv(uploaded_file)
-        else:
-            df = pd.read_excel(uploaded_file)
-
+    df, _ = get_uploaded_data()
+    if df is not None:
         st.write("Data preview:")
         st.dataframe(df.head())
 
@@ -142,4 +114,4 @@ elif page == "Upload & Fit":
             st.write(f"{key}: {value}")
 
         # Plot comparison
-        show_distribution(data=values, distribution=fitted_samples)
+        show_distribution(data=values, distribution=samples)
