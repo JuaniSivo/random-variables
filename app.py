@@ -1,13 +1,20 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils.plotting import plot_histogram, plot_cdf, plot_data_with_fit
+from utils.plotting import plot_histogram, plot_cdf, show_distribution
 from utils.storage import load_saved, save_distribution
 from distributions.uniform_dist import uniform_ui, uniform_sample
 from distributions.gaussian_dist import gaussian_ui, gaussian_sample
 from distributions.lognormal_dist import lognormal_ui, lognormal_sample
 from distributions.triangular_dist import triangular_ui, triangular_sample
 from scipy.stats import norm, lognorm, uniform, triang, truncnorm
+
+DIST_UI_SAMPLE = {
+    "Uniform": (uniform_ui, uniform_sample),
+    "Gaussian": (gaussian_ui, gaussian_sample),
+    "Lognormal": (lognormal_ui, lognormal_sample),
+    "Triangular": (triangular_ui, triangular_sample)
+}
 
 st.title("Probability Distribution Generator")
 
@@ -27,30 +34,15 @@ if page == "Generate Distribution":
     # Distribution selector
     dist_type = st.sidebar.selectbox(
         "Select a distribution",
-        ["Uniform", "Gaussian", "Lognormal", "Triangular"]
+        DIST_UI_SAMPLE.keys()
     )
 
-    if dist_type == "Uniform":
-        params = uniform_ui(sidebar=True)
-        samples = uniform_sample(params)
-
-    elif dist_type == "Gaussian":
-        params = gaussian_ui(sidebar=True)
-        samples = gaussian_sample(params)
-
-    elif dist_type == "Lognormal":
-        params = lognormal_ui(sidebar=True)
-        samples = lognormal_sample(params)
-
-    elif dist_type == "Triangular":
-        params = triangular_ui(sidebar=True)
-        samples = triangular_sample(params)
+    ui_func, sample_func = DIST_UI_SAMPLE[dist_type]
+    params = ui_func(sidebar=True)
+    samples = sample_func(params)
 
     # Plots
-    st.subheader("Histogram")
-    st.pyplot(plot_histogram(samples))
-    st.subheader("CDF")
-    st.pyplot(plot_cdf(samples))
+    show_distribution(data=samples)
 
     # Save distribution
     if st.button("Add distribution"):
@@ -111,8 +103,7 @@ elif page == "Upload & Fit":
         col = st.selectbox("Select column to fit", df.columns)
         values = df[col].dropna().values
 
-        st.subheader("Histogram of selected data")
-        st.pyplot(plot_histogram(values))
+        show_distribution(data=values)
 
         # Fit parameters
         if dist_type == "Uniform":
@@ -141,11 +132,4 @@ elif page == "Upload & Fit":
             st.write(f"{key}: {value}")
 
         # Plot comparison
-        st.subheader(f"Histogram with fitted {dist_type}")
-        st.pyplot(
-            plot_data_with_fit(
-                values,
-                fitted_samples,
-                title=f"{dist_type} fit"
-            )
-        )
+        show_distribution(data=values, distribution=fitted_samples)

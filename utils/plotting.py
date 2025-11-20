@@ -1,41 +1,82 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import streamlit as st
 
-def plot_histogram(samples, bins=40, alpha=0.6, figsize=(6,4), title="Histogram"):
+def plot_histogram(data=None, distribution=None, alpha=0.6, figsize=(6,4), title="Histogram"):
     """
     Returns a Matplotlib figure with the histogram of the samples.
     """
     fig, ax = plt.subplots(figsize=figsize)
-    ax.hist(samples, bins=int(np.sqrt(len(samples))), density=True, alpha=alpha)
+    
+    # Plot data
+    if data is not None:
+        bins_data = int(np.sqrt(len(data)))
+        ax.hist(
+            data,
+            bins=bins_data,
+            density=True,
+            histtype="bar",
+            alpha=alpha,
+            label="Real data"
+        )
+    
+    # Plot distribution
+    if distribution is not None:
+        bins_distribution = int(np.sqrt(len(distribution)))
+        ax.hist(
+            distribution,
+            bins=bins_distribution,
+            density=True,
+            histtype="step",
+            alpha=alpha,
+            label="Sintetic data"
+        )
+    
     ax.set_title(title)
     ax.set_xlabel("Value")
     ax.set_ylabel("Density")
+
     return fig
 
-def plot_cdf(samples, figsize=(6,4), title="CDF"):
+def plot_cdf(data=None, distribution=None, figsize=(6,4), title="CDF"):
     """
     Returns a Matplotlib figure with the cumulative distribution
     function.
     """
     fig, ax = plt.subplots(figsize=figsize)
-    sorted_s = np.sort(samples)
-    cdf = np.linspace(0, 1, len(sorted_s))
-    ax.plot(sorted_s, cdf, marker='.', linestyle='none')
+    
+    # Plot data
+    if data is not None:
+        bins_data = int(np.sqrt(len(data)))
+        ax.hist(
+            data,
+            bins=bins_data,
+            density=True,
+            cumulative=True,
+            histtype="step",
+            label="Real data"
+        )
+    
+    # Plot distribution
+    if distribution is not None:
+        bins_distribution = int(np.sqrt(len(distribution)))
+        ax.hist(
+            distribution,
+            bins=bins_distribution,
+            density=True,
+            cumulative=True,
+            histtype="step",
+            label="Sintetic data"
+        )
+    
     ax.set_title(title)
     ax.set_xlabel("Value")
     ax.set_ylabel("CDF")
+
     return fig
 
-def plot_data_with_fit(data, fitted_samples, title="Data vs Fitted", figsize=(6,4)):
-    """
-    Returns a figure overlaying a histogram of the original data and the
-    fitted samples.
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-    ax.hist(data, bins=int(np.sqrt(len(data))), alpha=0.6, density=True, label="Data")
-    ax.hist(fitted_samples, bins=int(np.sqrt(len(fitted_samples))), alpha=0.4, density=True, label="Fitted")
-    ax.set_title(title)
-    ax.set_xlabel("Value")
-    ax.set_ylabel("Density")
-    ax.legend()
-    return fig
+def show_distribution(data=None, distribution=None):
+    st.subheader("Histogram")
+    st.pyplot(plot_histogram(data=data, distribution=distribution))
+    st.subheader("CDF")
+    st.pyplot(plot_cdf(data=data, distribution=distribution))
