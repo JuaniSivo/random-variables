@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 
-def uniform_ui(sidebar=False):
+def uniform_ui(sidebar=True):
     ui = st.sidebar if sidebar else st
     low = ui.number_input("Lower bound", value=0.0)
     high = ui.number_input("Upper bound", value=1.0)

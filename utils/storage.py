@@ -1,6 +1,9 @@
 import json
 import os
 
+import pandas as pd
+import streamlit as st
+
 DATA_PATH = "data/saved_distributions.json"
 
 def load_saved():
@@ -29,3 +32,19 @@ def save_distribution(name, params):
     os.makedirs("data", exist_ok=True)
     with open(DATA_PATH, "w") as f:
         json.dump(data, f, indent=4)
+
+def get_uploaded_data():
+    uploaded_file = st.file_uploader("Choose CSV or Excel", type=["csv", "xlsx"])
+    if uploaded_file:
+        st.session_state["uploaded_file"] = uploaded_file
+    elif "uploaded_file" in st.session_state:
+        uploaded_file = st.session_state["uploaded_file"]
+    else:
+        return None, None
+
+    if uploaded_file.name.endswith(".csv"):
+        df = pd.read_csv(uploaded_file)
+    else:
+        df = pd.read_excel(uploaded_file)
+    st.session_state["uploaded_df"] = df
+    return df, uploaded_file
