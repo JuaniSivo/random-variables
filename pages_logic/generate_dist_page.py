@@ -35,9 +35,10 @@ def generate_dist_page():
     show_distribution(data=samples)
 
     # Save distribution
-    if st.button("Add distribution"):
-        save_distribution(dist_type, params)
-        st.success(f"{dist_type} distribution saved!")
+    save_name = st.text_input("Distribution name", value=f"{dist_type} dist")
+    if st.button("Save distribution"):
+        save_distribution(save_name, dist_type, params)
+        st.success(f"Saved as '{save_name}'")
 
     # Saved table
     st.subheader("Saved distributions")
