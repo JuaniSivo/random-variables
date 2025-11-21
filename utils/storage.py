@@ -1,37 +1,11 @@
 import json
 import os
 
+import numpy as np
 import pandas as pd
 import streamlit as st
 
 DATA_PATH = "data/saved_distributions.json"
-
-# def load_saved():
-#     """Load saved distributions from JSON as a dict."""
-#     if not os.path.exists(DATA_PATH):
-#         return {"distributions": []}
-#     try:
-#         with open(DATA_PATH, "r") as f:
-#             content = f.read().strip()
-#             if not content:
-#                 return {"distributions": []}
-#             data = json.loads(content)
-#             if "distributions" not in data or not isinstance(data["distributions"], list):
-#                 data["distributions"] = []
-#             return data
-#     except json.JSONDecodeError:
-#         return {"distributions": []}
-
-# def save_distribution(name, params):
-#     """Save a new distribution into the JSON dict."""
-#     data = load_saved()
-#     data["distributions"].append({
-#         "Distribution": name,
-#         "Parameters": params
-#     })
-#     os.makedirs("data", exist_ok=True)
-#     with open(DATA_PATH, "w") as f:
-#         json.dump(data, f, indent=4)
 
 def get_uploaded_data():
     uploaded_file = st.file_uploader("Choose CSV or Excel", type=["csv", "xlsx"])
@@ -52,7 +26,7 @@ def get_uploaded_data():
 def init_storage():
     if not os.path.exists(DATA_PATH):
         with open(DATA_PATH, "w") as f:
-            json.dump({"distributions": []}, f)
+            json.dump({"distributions": {}}, f)
 
 def load_saved():
     init_storage()
@@ -63,18 +37,31 @@ def save_all(data):
     with open(DATA_PATH, "w") as f:
         json.dump(data, f, indent=4)
 
-def save_distribution(name, dist_type, params):
-    new_dist = {"name": name, "type": dist_type, "params": params}
+def save_distribution(name, samples, metadata):
+    new_dist = {
+        # "name": name,
+        "metadata": metadata or {},
+        "samples": samples.tolist()
+    }
     data = load_saved()
-    data["distributions"].append(new_dist)
+    data["distributions"][name] = new_dist
     save_all(data)
 
-def rename_distribution(index, new_name):
+def rename_distribution(old_name, new_name):
+    if new_name == old_name: return None
     data = load_saved()
-    data["distributions"][index]["name"] = new_name
+    data["distributions"][new_name] = data["distributions"][old_name]
+    data["distributions"].pop(old_name)
     save_all(data)
 
-def delete_distribution(index):
+def delete_distribution(name):
     data = load_saved()
-    data["distributions"].pop(index)
+    data["distributions"].pop(name)
     save_all(data)
+
+def load_distribution_samples(name):
+    data = load_saved()
+    dist = data["distributions"][name]
+    samples = np.array(dist["samples"])
+
+    return samples

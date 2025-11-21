@@ -11,17 +11,17 @@ def manage_page():
         st.info("No saved distributions.")
         return
 
-    for i, dist in enumerate(dists):
-        with st.expander(f"{dist['name']} ({dist['type']})"):
-            st.write("Parameters:", dist["params"])
+    for name, info in dists.items():
+        with st.expander(name):
+            st.write("Metadata:", info["metadata"])
 
-            new_name = st.text_input(f"Rename #{i}", dist["name"], key=f"name_{i}")
-            if st.button(f"Apply rename #{i}"):
-                rename_distribution(i, new_name)
+            new_name = st.text_input(f"Rename {name}", name, key=f"tb_rename_{name}")
+            if st.button(f"Click to Rename", key=f"b_rename_{name}"):
+                rename_distribution(name, new_name)
                 st.success("Renamed!")
                 st.rerun()
 
-            if st.button(f"Delete #{i}"):
-                delete_distribution(i)
+            if st.button(f"Click to Delete", key=f"b_delete_{name}"):
+                delete_distribution(name)
                 st.warning("Deleted!")
                 st.rerun()
