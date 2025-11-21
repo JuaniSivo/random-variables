@@ -3,11 +3,12 @@ import streamlit as st
 from pages_logic.upload_fit_page import upload_fit_page
 from pages_logic.generate_dist_page import generate_dist_page
 from pages_logic.saved_distributions import manage_page
+from pages_logic.calc_page import calc_page
 
 st.title("Probability Distribution Generator")
 page = st.sidebar.radio(
     "Select page",
-    ["Generate Distribution", "Upload & Fit", "Manage Saved"]
+    ["Generate Distribution", "Upload & Fit", "Manage Saved", "Calculator"]
 )
 
 if page == "Generate Distribution":
@@ -16,3 +17,5 @@ elif page == "Upload & Fit":
     upload_fit_page()
 elif page == "Manage Saved":
     manage_page()
+elif page == "Calculator":
+    calc_page()
