@@ -3,18 +3,7 @@ import pandas as pd
 
 from utils.plotting import show_distribution
 from utils.storage import load_saved, save_distribution
-
-from distributions.uniform_dist import uniform_ui, uniform_sample
-from distributions.gaussian_dist import gaussian_ui, gaussian_sample
-from distributions.lognormal_dist import lognormal_ui, lognormal_sample
-from distributions.triangular_dist import triangular_ui, triangular_sample
-
-DIST_UI_SAMPLE = {
-    "Uniform": (uniform_ui, uniform_sample),
-    "Gaussian": (gaussian_ui, gaussian_sample),
-    "Lognormal": (lognormal_ui, lognormal_sample),
-    "Triangular": (triangular_ui, triangular_sample)
-}
+from utils.distributions import DIST_UI_SAMPLE
 
 def generate_dist_page():
     # Load saved distributions
@@ -35,9 +24,10 @@ def generate_dist_page():
     show_distribution(data=samples)
 
     # Save distribution
-    if st.button("Add distribution"):
-        save_distribution(dist_type, params)
-        st.success(f"{dist_type} distribution saved!")
+    save_name = st.text_input("Distribution name", value=f"{dist_type} dist")
+    if st.button("Save distribution"):
+        save_distribution(save_name, dist_type, params)
+        st.success(f"Saved as '{save_name}'")
 
     # Saved table
     st.subheader("Saved distributions")
