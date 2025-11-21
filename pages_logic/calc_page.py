@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from utils.storage import load_saved
+from utils.storage import load_saved, load_distribution_samples, save_distribution
 from utils.operations import combine_dists
 from utils.plotting import show_distribution
 from utils.distributions import DIST_UI_SAMPLE
@@ -10,33 +10,14 @@ from distributions.gaussian_dist import gaussian_sample
 from distributions.lognormal_dist import lognormal_sample
 from distributions.triangular_dist import triangular_sample
 
-# SAMPLERS = {
-#     "Uniform": uniform_sample,
-#     "Gaussian": gaussian_sample,
-#     "Lognormal": lognormal_sample,
-#     "Triangular": triangular_sample,
-# }
-
-def load_samples(dist):
-    # sampler = SAMPLERS[dist["type"]]
-    _, sample_func = DIST_UI_SAMPLE[dist["type"]]
-    # params = {k: v for k, v in dist.items() if k not in {"type", "name"}}
-    params = dist["params"]
-    # params["size"] = params.get("size", 10000)
-    params["size"] = 10000
-    return sample_func(params)
-
 def calc_page():
     st.title("Distribution Calculator")
 
-    saved_data = load_saved()
-    dists = saved_data.get("distributions", [])
-
+    data = load_saved()
+    dists = data["distributions"]
     if not dists:
         st.warning("No saved distributions found.")
         return
-
-    names = [d.get("name", f"{d['type']}") for d in dists]
 
     # ---- Operation mode ----
     mode = st.selectbox(
@@ -45,17 +26,14 @@ def calc_page():
     )
 
     st.subheader("Select distribution A")
-    idx_a = st.selectbox("Distribution A", range(len(dists)), format_func=lambda i: names[i])
-    dist_a = dists[idx_a]
-    samples_a = load_samples(dist_a)
+    dist_name_a = st.selectbox("Distribution A", dists.keys())
+    samples_a = load_distribution_samples(dist_name_a)
 
     # ---- SECOND OPERAND ----
     if mode == "Distribution with Distribution":
         st.subheader("Select distribution B")
-        idx_b = st.selectbox("Distribution B", range(len(dists)), format_func=lambda i: names[i])
-        dist_b = dists[idx_b]
-        samples_b = load_samples(dist_b)
-
+        dist_name_b = st.selectbox("Distribution B", dists.keys())
+        samples_b = load_distribution_samples(dist_name_b)
     else:
         st.subheader("Enter number")
         number = st.number_input("Value", value=1.0)
@@ -70,6 +48,13 @@ def calc_page():
     # ---- PLOTS ----
     st.subheader("Result distribution")
     show_distribution(data=result)
+
+    # ---- SAVE DISTRIBUTION ----
+    save_name = st.text_input("Distribution name", value=f"Calc dist")
+    if st.button("Save distribution"):
+        metadata = {"type": "Calculation"}
+        save_distribution(save_name, result, metadata)
+        st.success(f"Saved as '{save_name}'")
 
     # ---- DOWNLOAD ----
     st.download_button(
