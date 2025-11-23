@@ -42,7 +42,7 @@ def draw_histogram_panel(ax, data=None, distribution=None):
             alpha=0.45,
             label="Real data"
         )
-        _plot_kde(ax, data, "Real")
+        # _plot_kde(ax, data, "Real")
 
     # Synthetic distribution histogram
     if distribution is not None:
@@ -55,7 +55,7 @@ def draw_histogram_panel(ax, data=None, distribution=None):
             linewidth=1.4,
             label="Synthetic data"
         )
-        _plot_kde(ax, distribution, "Synthetic")
+        # _plot_kde(ax, distribution, "Synthetic")
 
     ax.set_title("Histogram + KDE")
     ax.set_xlabel("Value")
