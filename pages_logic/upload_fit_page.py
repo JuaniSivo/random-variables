@@ -27,7 +27,7 @@ def upload_fit_page():
 
     # Column selection
     col = st.selectbox("Select column to fit", df.columns)
-    values = df[col].dropna().values
+    values = df[col].dropna().to_numpy()
 
     # Custom data visualization
     show_distribution(data=values)

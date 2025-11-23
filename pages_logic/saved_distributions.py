@@ -16,7 +16,7 @@ def manage_page():
             st.write("Metadata:", info["metadata"])
 
             new_name = st.text_input(f"Rename {name}", name, key=f"tb_rename_{name}")
-            if st.button(f"Click to Rename", key=f"b_rename_{name}"):
+            if st.button(f"Click to Rename", key=f"b_rename_{name}") and new_name is not None:
                 rename_distribution(name, new_name)
                 st.success("Renamed!")
                 st.rerun()

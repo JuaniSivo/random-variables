@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from utils.plotting import show_distribution
-from utils.storage import load_saved, save_distribution
+from utils.storage import save_distribution
 from utils.distributions import DIST_UI_SAMPLE
 
 def generate_dist_page():

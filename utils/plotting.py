@@ -1,82 +1,112 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import gaussian_kde
 import streamlit as st
 
-def plot_histogram(data=None, distribution=None, alpha=0.6, figsize=(6,4), title="Histogram"):
+
+def _auto_bins(x: np.ndarray) -> int:
     """
-    Returns a Matplotlib figure with the histogram of the samples.
+    Automatic bin size using Freedman–Diaconis rule.
     """
-    fig, ax = plt.subplots(figsize=figsize)
-    
-    # Plot data
+    x = np.asarray(x)
+    n = len(x)
+    if n < 2:
+        return 1
+
+    q25, q75 = np.percentile(x, [25, 75])
+    iqr = q75 - q25
+    bin_width = 2 * iqr / (n ** (1/3))
+
+    if bin_width <= 0:
+        return int(np.sqrt(n))
+
+    bins = int((x.max() - x.min()) / bin_width)
+    return max(bins, 1)
+
+
+def _plot_kde(ax, x, label):
+    kde = gaussian_kde(x)
+    xs = np.linspace(x.min(), x.max(), 200)
+    ax.plot(xs, kde(xs), linewidth=1.4, label=f"{label} KDE")
+
+
+def draw_histogram_panel(ax, data=None, distribution=None):
+    """Draw histogram + KDE curves."""
+    # Real data histogram
     if data is not None:
-        bins_data = int(np.sqrt(len(data)))
+        bins_data = _auto_bins(data)
         ax.hist(
             data,
             bins=bins_data,
             density=True,
-            histtype="bar",
-            alpha=alpha,
+            alpha=0.45,
             label="Real data"
         )
-    
-    # Plot distribution
+        # _plot_kde(ax, data, "Real")
+
+    # Synthetic distribution histogram
     if distribution is not None:
-        bins_distribution = int(np.sqrt(len(distribution)))
+        bins_dist = _auto_bins(distribution)
         ax.hist(
             distribution,
-            bins=bins_distribution,
+            bins=bins_dist,
             density=True,
             histtype="step",
-            alpha=alpha,
-            label="Sintetic data"
+            linewidth=1.4,
+            label="Synthetic data"
         )
-    
-    ax.set_title(title)
+        # _plot_kde(ax, distribution, "Synthetic")
+
+    ax.set_title("Histogram + KDE")
     ax.set_xlabel("Value")
     ax.set_ylabel("Density")
+    ax.grid(alpha=0.2)
+    ax.legend()
 
-    return fig
 
-def plot_cdf(data=None, distribution=None, figsize=(6,4), title="CDF"):
-    """
-    Returns a Matplotlib figure with the cumulative distribution
-    function.
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-    
-    # Plot data
+def draw_cdf_panel(ax, data=None, distribution=None):
+    """Draw empirical CDF for data and synthetic distribution."""
+    # Real data CDF
     if data is not None:
-        bins_data = int(np.sqrt(len(data)))
-        ax.hist(
-            data,
-            bins=bins_data,
-            density=True,
-            cumulative=True,
-            histtype="step",
-            label="Real data"
-        )
-    
-    # Plot distribution
+        xs = np.sort(data)
+        ys = np.linspace(0, 1, len(xs))
+        ax.plot(xs, ys, linewidth=1.4, label="Real data")
+
+    # Synthetic distribution CDF
     if distribution is not None:
-        bins_distribution = int(np.sqrt(len(distribution)))
-        ax.hist(
-            distribution,
-            bins=bins_distribution,
-            density=True,
-            cumulative=True,
-            histtype="step",
-            label="Sintetic data"
-        )
-    
-    ax.set_title(title)
+        xs = np.sort(distribution)
+        ys = np.linspace(0, 1, len(xs))
+        ax.plot(xs, ys, linewidth=1.4, label="Synthetic data")
+
+    ax.set_title("CDF")
     ax.set_xlabel("Value")
     ax.set_ylabel("CDF")
+    ax.grid(alpha=0.2)
+    ax.legend()
+    
+
+def plot_distribution(data=None, distribution=None, figsize=(12, 8), title="Distribution"):
+    """
+    Plot histogram + KDE on the left and CDF on the right.
+    Delegates drawing to smaller, testable functions.
+    """
+    fig, axes = plt.subplots(1, 2, figsize=figsize)
+    ax_hist, ax_cdf = axes
+
+    draw_histogram_panel(ax_hist, data=data, distribution=distribution)
+    draw_cdf_panel(ax_cdf, data=data, distribution=distribution)
+
+    fig.suptitle(title, fontsize=14)
+    fig.tight_layout()
 
     return fig
 
-def show_distribution(data=None, distribution=None):
-    st.subheader("Histogram")
-    st.pyplot(plot_histogram(data=data, distribution=distribution))
-    st.subheader("CDF")
-    st.pyplot(plot_cdf(data=data, distribution=distribution))
+
+def show_distribution(data=None, distribution=None, title="Distribution"):
+    st.pyplot(
+        plot_distribution(
+            data=data, 
+            distribution=distribution, 
+            title=title
+        )
+    )
